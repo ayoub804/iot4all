@@ -21,6 +21,16 @@ exports.apply = async (req, res) => {
     }
 };
 
+// GET /api/recruitment/my  (User)
+exports.getMyApplication = async (req, res) => {
+    try {
+        const app = await Recruitment.findOne({ email: req.user.email }).sort({ createdAt: -1 });
+        res.json({ app });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
 // GET /api/recruitment  (Admin/Supervisor)
 exports.getApplications = async (req, res) => {
     try {
