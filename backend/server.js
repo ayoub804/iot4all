@@ -28,6 +28,7 @@ app.use('/api/members', require('./routes/members'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/recruitment', require('./routes/recruitment'));
 app.use('/api/messages', require('./routes/messages'));
+app.use('/api/badges', require('./routes/badges'));
 
 app.get('/', (req, res) => res.json({ message: 'IoT4ALL API Running ✓' }));
 
@@ -80,6 +81,35 @@ io.on('connection', (socket) => {
         } catch (err) {
             socket.emit('error', { message: 'Failed to send message' });
         }
+    });
+
+    // Call signaling
+    socket.on('call_user', (data) => {
+        io.to(data.to).emit('incoming_call', { from: socket.user._id, fromName: data.fromName });
+    });
+
+    socket.on('accept_call', (data) => {
+        io.to(data.to).emit('call_accepted', { from: socket.user._id });
+    });
+
+    socket.on('offer', (data) => {
+        io.to(data.to).emit('offer', { from: socket.user._id, offer: data.offer });
+    });
+
+    socket.on('answer', (data) => {
+        io.to(data.to).emit('answer', { from: socket.user._id, answer: data.answer });
+    });
+
+    socket.on('ice_candidate', (data) => {
+        io.to(data.to).emit('ice_candidate', { from: socket.user._id, candidate: data.candidate });
+    });
+
+    socket.on('end_call', (data) => {
+        io.to(data.to).emit('call_ended');
+    });
+
+    socket.on('reject_call', (data) => {
+        io.to(data.to).emit('call_rejected');
     });
 
     socket.on('disconnect', () => {

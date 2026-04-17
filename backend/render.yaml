@@ -1,20 +1,22 @@
-# Render.com deployment config for the Express backend
 services:
   - type: web
     name: iot4all-backend
-    runtime: node
+    env: node
     buildCommand: npm install
-    startCommand: node server.js
+    startCommand: npm start
     envVars:
-      - key: PORT
-        value: 10000
       - key: NODE_ENV
         value: production
       - key: MONGO_URI
-        sync: false       # Set this manually in Render dashboard
+        fromDatabase:
+          name: iot4all-db
+          property: connectionString
       - key: JWT_SECRET
-        sync: false       # Set this manually in Render dashboard
+        generateValue: true
       - key: JWT_EXPIRE
-        value: 7d
-      - key: CLIENT_URL
-        sync: false       # Set to your Firebase App Hosting URL after deploy
+        value: 30d
+
+databases:
+  - name: iot4all-db
+    databaseName: iot4all
+    user: iot4all

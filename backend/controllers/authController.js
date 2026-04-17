@@ -11,7 +11,7 @@ exports.register = async (req, res) => {
         const exists = await User.findOne({ email });
         if (exists) return res.status(400).json({ message: 'Email already registered' });
 
-        const user = await User.create({ name, email, password, field, status: 'Active' });
+        const user = await User.create({ name, email, password, field, role: 'User', status: 'Active' });
         const token = signToken(user._id);
 
         res.status(201).json({
@@ -46,7 +46,7 @@ exports.login = async (req, res) => {
 
 // GET /api/auth/me
 exports.getMe = async (req, res) => {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).populate('badges');
     res.json({ user });
 };
 

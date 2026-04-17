@@ -7,21 +7,21 @@ const UserSchema = new mongoose.Schema({
     password: { type: String, required: true, select: false },
     role: {
         type: String,
-        enum: ['Admin', 'Founder Supervisor', 'Founder Member', 'Supervisor', 'Member'],
-        default: 'Member'
+        enum: ['Admin', 'Founder Supervisor', 'Founder Member', 'Supervisor', 'Member', 'User'],
+        default: 'User'
     },
     field: { type: String, default: '' },
     skills: [{ type: String }],
     status: { type: String, enum: ['Active', 'Inactive', 'Pending'], default: 'Pending' },
     avatar: { type: String, default: '' },
-    bio: { type: String, default: '' }
+    bio: { type: String, default: '' },
+    badges: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Badge' }]
 }, { timestamps: true });
 
-UserSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
+UserSchema.pre('save', async function () {
+    if (!this.isModified('password')) return;
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    next();
 });
 
 UserSchema.methods.matchPassword = async function (entered) {

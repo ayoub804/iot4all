@@ -36,14 +36,22 @@ exports.updateStatus = async (req, res) => {
         );
         if (!app) return res.status(404).json({ message: 'Application not found' });
 
-        // If accepted, auto-create a user account with a temp password
+        // If accepted, update user role to Member (or create if doesn't exist)
         if (status === 'Accepted') {
             const exists = await User.findOne({ email: app.email });
-            if (!exists) {
+            if (exists) {
+                // Update existing user to Member
+                exists.role = 'Member';
+                exists.status = 'Active';
+                exists.field = exists.field || app.field;
+                exists.skills = exists.skills.length > 0 ? exists.skills : app.skills;
+                await exists.save();
+            } else {
+                // Create new user as Member (if they somehow don't have an account)
                 await User.create({
                     name: app.name,
                     email: app.email,
-                    password: 'TempPass123!',   // user must change on first login
+                    password: 'TempPass123!',
                     field: app.field,
                     skills: app.skills,
                     role: 'Member',
