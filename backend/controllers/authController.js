@@ -63,3 +63,17 @@ exports.updateMe = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+// DELETE /api/auth/me  (delete account)
+exports.deleteMe = async (req, res) => {
+    try {
+        // Delete user's applications first (optional but good practice)
+        const Recruitment = require('../models/Recruitment');
+        await Recruitment.deleteMany({ email: req.user.email });
+
+        await User.findByIdAndDelete(req.user.id);
+        res.json({ message: 'Account deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
