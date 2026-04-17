@@ -5,12 +5,18 @@ const jwt = require('jsonwebtoken');
 // POST /api/recruitment  (public - submit application)
 exports.apply = async (req, res) => {
     try {
+        console.log('Incoming application:', req.body);
         const { name, email, field, motivation, skills } = req.body;
+        if (!name || !email || !field) {
+            return res.status(400).json({ message: 'Missing required fields (name, email, field)' });
+        }
         const existing = await Recruitment.findOne({ email, status: 'Pending' });
         if (existing) return res.status(400).json({ message: 'Application already submitted' });
         const app = await Recruitment.create({ name, email, field, motivation, skills });
+        console.log('Application saved:', app);
         res.status(201).json({ message: 'Application submitted successfully', app });
     } catch (err) {
+        console.error('Recruitment apply error:', err);
         res.status(500).json({ message: err.message });
     }
 };
