@@ -4,7 +4,6 @@ const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const morgan = require('morgan');
 const { createMessage } = require('./controllers/messageController');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User');
@@ -20,7 +19,12 @@ const io = new Server(server, {
 // Middleware
 app.use(cors({ origin: process.env.CLIENT_URL || '*', credentials: true }));
 app.use(express.json());
-if (process.env.NODE_ENV !== 'production') app.use(morgan('dev'));
+if (process.env.NODE_ENV !== 'production') {
+    try {
+        const morgan = require('morgan');
+        app.use(morgan('dev'));
+    } catch (e) { }
+}
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
