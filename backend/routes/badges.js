@@ -9,10 +9,13 @@ router.get('/', badgeController.getBadges);
 // GET user's badges
 router.get('/user/:userId', badgeController.getUserBadges);
 
-// POST add badge to user (admin only)
-router.post('/user/add', protect, authorize('Admin'), badgeController.addBadgeToUser);
+// POST initialize default badges (admin/supervisor only)
+router.post('/init', protect, authorize('Admin', 'Supervisor', 'Founder Supervisor'), badgeController.initBadges);
 
-// DELETE remove badge from user (admin only)
-router.delete('/user/remove', protect, authorize('Admin'), badgeController.removeBadgeFromUser);
+// POST add badge to user (admin/supervisor only)
+router.post('/user/add', protect, authorize('Admin', 'Supervisor', 'Founder Supervisor'), badgeController.addBadgeToUser);
+
+// DELETE remove badge from user (admin/supervisor only)
+router.delete('/user/remove', protect, authorize('Admin', 'Supervisor', 'Founder Supervisor'), badgeController.removeBadgeFromUser);
 
 module.exports = router;
