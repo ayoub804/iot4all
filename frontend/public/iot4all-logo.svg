@@ -1,0 +1,27 @@
+<svg viewBox="0 0 300 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&display=swap');
+      
+      .main-text {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 800;
+        fill: #C8F135;
+        filter: drop-shadow(0 0 8px #C8F135) drop-shadow(0 0 16px rgba(200, 241, 53, 0.6));
+      }
+      
+      .sub-text {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        fill: #C8F135;
+        filter: drop-shadow(0 0 4px #C8F135) drop-shadow(0 0 8px rgba(200, 241, 53, 0.4));
+      }
+    </style>
+  </defs>
+  
+  <!-- Main text -->
+  <text x="150" y="75" text-anchor="middle" font-size="68" class="main-text">IoT4ALL</text>
+  
+  <!-- Sub text -->
+  <text x="150" y="108" text-anchor="middle" font-size="28" class="sub-text">ISSATM</text>
+</svg>

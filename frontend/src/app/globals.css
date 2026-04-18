@@ -1,0 +1,230 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+
+  --color-accent: #C8F135;
+  --color-dark-900: #0A0A0A;
+  --color-dark-800: #111111;
+  --color-dark-700: #1A1A1A;
+  --color-dark-600: #222222;
+  --color-dark-500: #2E2E2E;
+  --color-light-50: #FAFAFA;
+  --color-light-100: #F5F5F5;
+  --color-light-200: #EBEBEB;
+  --color-light-300: #D9D9D9;
+  --color-light-400: #BBBBBB;
+
+  --animate-fade-up: fadeUp 0.6s ease forwards;
+  --animate-fade-in: fadeIn 0.4s ease forwards;
+  --animate-slide-right: slideRight 0.5s ease forwards;
+  --animate-pulse-dot: pulseDot 2s ease-in-out infinite;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-car-move: carMove 3s ease-in-out infinite;
+
+  @keyframes fadeUp {
+    0% {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideRight {
+    0% {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes pulseDot {
+
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    50% {
+      transform: scale(1.5);
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes carMove {
+
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+
+    50% {
+      transform: translateX(8px);
+    }
+  }
+}
+
+/* ---------- LIGHT mode defaults (no class needed) ---------- */
+:root {
+  --bg: #FAFAFA;
+  --bg-secondary: #F0F0F0;
+  --surface: rgba(255, 255, 255, 0.9);
+  --surface-border: rgba(0, 0, 0, 0.15);
+  --text-primary: #0A0A0A;
+  --text-secondary: #333333;
+  --text-muted: #666666;
+  color-scheme: light;
+}
+
+/* ---------- DARK mode overrides ---------- */
+.dark {
+  --bg: #0A0A0A;
+  --bg-secondary: #111111;
+  --surface: rgba(17, 17, 17, 0.85);
+  --surface-border: rgba(255, 255, 255, 0.06);
+  --text-primary: #FAFAFA;
+  --text-secondary: #D9D9D9;
+  --text-muted: #888888;
+  color-scheme: dark;
+}
+
+/* ---------- Base ---------- */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  margin: 0;
+  transition: background 0.3s ease, color 0.2s ease;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 2px;
+}
+
+/* ---------- Semantic utility classes ---------- */
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+/* ---------- Glass panel ---------- */
+.glass-panel {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-panel:hover {
+  border-color: rgba(200, 241, 53, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- Hero background ---------- */
+.hero-bg {
+  background:
+    radial-gradient(ellipse 80% 60% at 60% 40%, rgba(200, 241, 53, .08) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 80% at 20% 80%, rgba(200, 241, 53, .05) 0%, transparent 50%),
+    var(--bg);
+}
+
+/* ---------- Accent text / borders ---------- */
+.glow-text,
+.glow-text-green {
+  color: #C8F135;
+}
+
+.neon-border {
+  border: 1px solid #C8F135;
+  box-shadow: 0 0 10px rgba(200, 241, 53, 0.15);
+}
+
+/* ---------- Grain overlay ---------- */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: 0.35;
+}
+
+/* ---------- Navbar underline effect ---------- */
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background: #C8F135;
+  transition: width .3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
