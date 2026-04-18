@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
-import { Send, Loader2, Hash, Lock, Phone, Video, Mic, MicOff, VideoOff, X } from "lucide-react";
+import { Send, Loader2, Hash, Lock, Phone, Video, Mic, MicOff, VideoOff, X, Paperclip, FileText, Download, PlayCircle, Image } from "lucide-react";
 
 const CHANNELS = [
     { id: "general", label: "general", emoji: "#" },
@@ -13,17 +13,19 @@ const CHANNELS = [
     { id: "off-topic", label: "off-topic", emoji: "#" },
 ];
 
-interface Msg { _id?: string; user: { _id?: string; name: string; avatar?: string; role?: string }; content: string; createdAt: string; }
+interface Msg { _id?: string; user: { _id?: string; name: string; avatar?: string; role?: string }; content: string; createdAt: string; fileData?: string; fileName?: string; fileType?: string; }
 
 export default function MeetingPage() {
     const { user, token, isMember } = useAuth();
     const [channel, setChannel] = useState("general");
     const [messages, setMessages] = useState<Msg[]>([]);
     const [input, setInput] = useState("");
+    const [file, setFile] = useState<{ data: string; name: string; type: string } | null>(null);
     const [loading, setLoading] = useState(true);
     const [socketReady, setSocketReady] = useState(false);
     const socketRef = useRef<Socket | null>(null);
     const bottomRef = useRef<HTMLDivElement | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Call state
     const [inCall, setInCall] = useState(false);
@@ -215,10 +217,36 @@ export default function MeetingPage() {
     // Scroll to bottom
     useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selected = e.target.files?.[0];
+        if (!selected) return;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setFile({
+                data: reader.result as string,
+                name: selected.name,
+                type: selected.type
+            });
+        };
+        reader.readAsDataURL(selected);
+    };
+
     const send = () => {
-        if (!input.trim() || !socketRef.current || !user) return;
-        socketRef.current.emit('send_message', { channel, content: input.trim() });
+        if ((!input.trim() && !file) || !socketRef.current || !user) return;
+        
+        const payload = {
+            channel,
+            content: input.trim() || (file ? `Sent a file: ${file.name}` : ""),
+            fileData: file?.data,
+            fileName: file?.name,
+            fileType: file?.type
+        };
+
+        socketRef.current.emit('send_message', payload);
         setInput("");
+        setFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
     const handleKey = (e: React.KeyboardEvent) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
@@ -403,6 +431,33 @@ export default function MeetingPage() {
                                     <span className="text-xs text-muted">{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
                                 <p className="text-sm text-secondary mt-0.5 leading-relaxed">{msg.content}</p>
+                                
+                                {msg.fileData && (
+                                    <div className="mt-3 max-w-sm">
+                                        {msg.fileType?.startsWith('image/') ? (
+                                            <div className="rounded-xl overflow-hidden border border-accent/20 bg-accent/5">
+                                                <img src={msg.fileData} className="w-full h-auto max-h-64 object-contain" alt={msg.fileName} />
+                                            </div>
+                                        ) : msg.fileType?.startsWith('video/') ? (
+                                            <div className="rounded-xl overflow-hidden border border-accent/20 bg-black">
+                                                <video controls src={msg.fileData} className="w-full h-auto max-h-64" />
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-3 p-3 rounded-xl border border-accent/20 bg-accent/5">
+                                                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
+                                                    <FileText size={20} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-xs font-bold text-primary truncate">{msg.fileName}</p>
+                                                    <p className="text-[10px] text-muted uppercase">{msg.fileType?.split('/')[1] || 'File'}</p>
+                                                </div>
+                                                <a href={msg.fileData} download={msg.fileName} className="w-8 h-8 rounded-full glass-panel flex items-center justify-center text-accent hover:bg-accent hover:text-dark-900 transition-all">
+                                                    <Download size={14} />
+                                                </a>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}
@@ -411,15 +466,36 @@ export default function MeetingPage() {
 
                 {/* Input */}
                 <div className="px-6 py-4">
+                    {file && (
+                        <div className="mb-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-accent/10 border border-accent/20 animate-fade-up">
+                            {file.type.startsWith('image/') ? <Image size={16} className="text-accent" /> : <FileText size={16} className="text-accent" />}
+                            <span className="text-xs font-medium text-primary flex-1 truncate">{file.name}</span>
+                            <button onClick={() => setFile(null)} className="text-muted hover:text-red-400">
+                                <X size={14} />
+                            </button>
+                        </div>
+                    )}
                     <div className="flex items-center gap-3 glass-panel rounded-xl px-4 py-2">
+                        <button 
+                            onClick={() => fileInputRef.current?.click()}
+                            className="text-muted hover:text-accent transition-colors"
+                        >
+                            <Paperclip size={18} />
+                            <input 
+                                type="file" 
+                                ref={fileInputRef} 
+                                onChange={handleFileSelect} 
+                                className="hidden" 
+                            />
+                        </button>
                         <input
                             value={input}
                             onChange={e => setInput(e.target.value)}
                             onKeyDown={handleKey}
-                            placeholder={`Message #${channel}`}
+                            placeholder={file ? "Add a caption..." : `Message #${channel}`}
                             className="flex-1 bg-transparent text-sm text-primary placeholder:text-muted outline-none font-body"
                         />
-                        <button onClick={send} disabled={!input.trim()} className="text-accent disabled:opacity-30 hover:text-white transition-colors">
+                        <button onClick={send} disabled={!input.trim() && !file} className="text-accent disabled:opacity-30 hover:text-white transition-colors">
                             <Send size={18} />
                         </button>
                     </div>

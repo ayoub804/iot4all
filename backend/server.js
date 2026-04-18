@@ -71,13 +71,19 @@ io.on('connection', (socket) => {
             const saved = await createMessage({
                 channel: data.channel,
                 user: socket.user._id,
-                content: data.content
+                content: data.content,
+                fileData: data.fileData,
+                fileName: data.fileName,
+                fileType: data.fileType
             });
 
             const payload = {
                 _id: saved._id,
                 channel: data.channel,
                 content: data.content,
+                fileData: saved.fileData,
+                fileName: saved.fileName,
+                fileType: saved.fileType,
                 user: { _id: socket.user._id, name: socket.user.name, avatar: socket.user.avatar, role: socket.user.role },
                 createdAt: saved.createdAt
             };

@@ -4,6 +4,9 @@ const MessageSchema = new mongoose.Schema({
     channel: { type: String, required: true, default: 'general' },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     content: { type: String, required: true },
+    fileData: { type: String },
+    fileName: { type: String },
+    fileType: { type: String },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Message', MessageSchema);

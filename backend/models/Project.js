@@ -11,6 +11,8 @@ const ProjectSchema = new mongoose.Schema({
         completed: { type: Boolean, default: false }
     }],
     tags: [{ type: String }],
+    images: [{ type: String }],
+    githubLink: { type: String, default: '' },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 

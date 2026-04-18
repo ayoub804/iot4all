@@ -6,16 +6,24 @@ import { ArrowRight, Cpu, Network, Zap, ShieldCheck, Microscope, Loader2 } from 
 import { api } from "@/lib/api";
 
 interface Member { _id: string; name: string; email: string; role: string; field: string; skills: string[]; status: string; avatar: string; badges: Array<{ name: string; icon: string; color: string }>; }
+interface Project { _id: string; title: string; description: string; progress: number; status: string; tags: string[]; }
 
 export default function HomePage() {
   const [members, setMembers] = useState<Member[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [projectsLoading, setProjectsLoading] = useState(true);
 
   useEffect(() => {
     api.getMembers()
       .then(d => setMembers(d.members))
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    api.getProjects()
+      .then(d => setProjects(d.projects))
+      .catch(() => {})
+      .finally(() => setProjectsLoading(false));
   }, []);
 
   return (
@@ -65,28 +73,61 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            { title: "Smart City Grid", desc: "Using LoRaWAN sensors to monitor city air quality map.", icon: Network, color: "text-accent", border: "hover:border-accent border-accent/10" },
-            { title: "AI Drone Surveillance", desc: "Computer vision and embedded systems on custom drones.", icon: Zap, color: "text-accent", border: "hover:border-accent border-accent/10" },
-            { title: "Bio-metric Security", desc: "Advanced access control via RFID and facial recognition.", icon: ShieldCheck, color: "text-blue-400", border: "hover:border-blue-400 border-blue-400/10" }
-          ].map((project, idx) => (
-            <div key={idx} className={`glass-panel p-8 rounded-2xl flex flex-col gap-4 border transition-all duration-300 group ${project.border}`}>
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform" style={{ background: 'var(--bg-secondary)' }}>
-                <project.icon className={project.color} size={24} />
-              </div>
-              <h3 className="text-2xl font-display font-bold text-primary">{project.title}</h3>
-              <p className="text-secondary font-body text-sm leading-relaxed mb-4">{project.desc}</p>
-              <div className="mt-auto">
-                <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: 'var(--bg-secondary)' }}>
-                  <div className={`h-full bg-current ${project.color}`} style={{ width: '80%' }} />
+          {projectsLoading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="glass-panel p-8 rounded-2xl border border-accent/10 animate-pulse h-64" />
+            ))
+          ) : projects.length === 0 ? (
+            [
+              { title: "Smart City Grid", desc: "Using LoRaWAN sensors to monitor city air quality map.", icon: Network, color: "text-accent", border: "hover:border-accent border-accent/10", progress: 80 },
+              { title: "AI Drone Surveillance", desc: "Computer vision and embedded systems on custom drones.", icon: Zap, color: "text-accent", border: "hover:border-accent border-accent/10", progress: 45 },
+              { title: "Bio-metric Security", desc: "Advanced access control via RFID and facial recognition.", icon: ShieldCheck, color: "text-blue-400", border: "hover:border-blue-400 border-blue-400/10", progress: 95 }
+            ].map((project, idx) => (
+              <div key={idx} className={`glass-panel p-8 rounded-2xl flex flex-col gap-4 border transition-all duration-300 group ${project.border}`}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform" style={{ background: 'var(--bg-secondary)' }}>
+                  <project.icon className={project.color} size={24} />
                 </div>
-                <div className="flex justify-between text-xs mt-2 text-muted">
-                  <span>Development</span>
-                  <span>80%</span>
+                <h3 className="text-2xl font-display font-bold text-primary">{project.title}</h3>
+                <p className="text-secondary font-body text-sm leading-relaxed mb-4">{project.desc}</p>
+                <div className="mt-auto">
+                  <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: 'var(--bg-secondary)' }}>
+                    <div className={`h-full bg-current ${project.color}`} style={{ width: `${project.progress}%` }} />
+                  </div>
+                  <div className="flex justify-between text-xs mt-2 text-muted">
+                    <span>{project.progress === 100 ? 'Completed' : 'Development'}</span>
+                    <span>{project.progress}%</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            projects.slice(0, 3).map((project, idx) => {
+              const colors = ["text-accent", "text-blue-400", "text-purple-400"];
+              const color = colors[idx % colors.length];
+              const borderColor = color === "text-accent" ? "hover:border-accent border-accent/10" : 
+                                color === "text-blue-400" ? "hover:border-blue-400 border-blue-400/10" : 
+                                "hover:border-purple-400 border-purple-400/10";
+              
+              return (
+                <div key={project._id} className={`glass-panel p-8 rounded-2xl flex flex-col gap-4 border transition-all duration-300 group ${borderColor}`}>
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform" style={{ background: 'var(--bg-secondary)' }}>
+                    <Network className={color} size={24} />
+                  </div>
+                  <h3 className="text-2xl font-display font-bold text-primary line-clamp-1">{project.title}</h3>
+                  <p className="text-secondary font-body text-sm leading-relaxed mb-4 line-clamp-2">{project.description}</p>
+                  <div className="mt-auto">
+                    <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: 'var(--bg-secondary)' }}>
+                      <div className={`h-full bg-current ${color}`} style={{ width: `${project.progress}%` }} />
+                    </div>
+                    <div className="flex justify-between text-xs mt-2 text-muted">
+                      <span>{project.status}</span>
+                      <span>{project.progress}%</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
 
         <div className="flex justify-center mt-12">

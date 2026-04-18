@@ -10,6 +10,7 @@ export default function LoginPage() {
     const router = useRouter();
     const { login } = useAuth();
     const [form, setForm] = useState({ email: "", password: "" });
+    const [rememberMe, setRememberMe] = useState(false);
     const [showPw, setShowPw] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -19,7 +20,7 @@ export default function LoginPage() {
         setError("");
         setLoading(true);
         try {
-            await login(form.email, form.password);
+            await login(form.email, form.password, rememberMe);
             router.push("/");
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Login failed");
@@ -76,6 +77,19 @@ export default function LoginPage() {
                                 {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                         </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 px-1">
+                        <input
+                            type="checkbox"
+                            id="rememberMe"
+                            checked={rememberMe}
+                            onChange={e => setRememberMe(e.target.checked)}
+                            className="w-4 h-4 rounded border-accent/30 text-accent bg-transparent focus:ring-accent accent-accent cursor-pointer"
+                        />
+                        <label htmlFor="rememberMe" className="text-sm font-body text-secondary cursor-pointer select-none hover:text-primary transition-colors">
+                            Keep me signed in
+                        </label>
                     </div>
 
                     <button

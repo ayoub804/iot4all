@@ -16,7 +16,7 @@ interface AuthContextType {
     user: AuthUser | null;
     token: string | null;
     loading: boolean;
-    login: (email: string, password: string) => Promise<void>;
+    login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
     register: (data: object) => Promise<void>;
     logout: () => void;
     isAdmin: boolean;
@@ -33,21 +33,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Rehydrate on page load
     useEffect(() => {
-        const stored = localStorage.getItem('iot4all_token');
+        const stored = localStorage.getItem('iot4all_token') || sessionStorage.getItem('iot4all_token');
         if (stored) {
             setToken(stored);
             api.getMe()
                 .then(({ user }) => setUser(user))
-                .catch(() => { localStorage.removeItem('iot4all_token'); })
+                .catch(() => { 
+                    localStorage.removeItem('iot4all_token');
+                    sessionStorage.removeItem('iot4all_token');
+                })
                 .finally(() => setLoading(false));
         } else {
             setLoading(false);
         }
     }, []);
 
-    const login = async (email: string, password: string) => {
+    const login = async (email: string, password: string, rememberMe: boolean = false) => {
         const { token: t, user: u } = await api.login({ email, password });
-        localStorage.setItem('iot4all_token', t);
+        if (rememberMe) {
+            localStorage.setItem('iot4all_token', t);
+        } else {
+            sessionStorage.setItem('iot4all_token', t);
+        }
         setToken(t);
         setUser(u);
     };
@@ -61,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const logout = () => {
         localStorage.removeItem('iot4all_token');
+        sessionStorage.removeItem('iot4all_token');
         setToken(null);
         setUser(null);
     };
