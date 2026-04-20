@@ -19,7 +19,7 @@ const NAV_LINKS = [
 export default function Navbar() {
     const pathname = usePathname();
     const router = useRouter();
-    const { user, logout, isAdmin } = useAuth();
+    const { user, logout, isAdmin, loading } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
 
     const handleLogout = () => {
@@ -78,7 +78,9 @@ export default function Navbar() {
                     <ThemeToggle />
                     <div className="w-px h-6 mx-1" style={{ backgroundColor: 'var(--surface-border)' }} />
 
-                    {user ? (
+                    {loading ? (
+                        <div className="w-24 h-8 animate-pulse rounded-full bg-white/5" />
+                    ) : user ? (
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center text-xs font-bold text-accent">

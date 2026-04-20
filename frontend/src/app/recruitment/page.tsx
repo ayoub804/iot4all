@@ -14,7 +14,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function RecruitmentPage() {
-    const { isSupervisor, user, isMember } = useAuth();
+    const { isSupervisor, user, isMember, loading: authLoading } = useAuth();
     const [apps, setApps] = useState<App[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
@@ -110,6 +110,12 @@ export default function RecruitmentPage() {
             setSubmitting(false);
         }
     };
+
+    if (authLoading) return (
+        <main className="flex-1 flex items-center justify-center">
+            <Loader2 className="text-accent animate-spin" size={40} />
+        </main>
+    );
 
     if (!user) return (
         <main className="flex-1 flex items-center justify-center text-center px-6">

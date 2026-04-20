@@ -33,14 +33,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Rehydrate on page load
     useEffect(() => {
-        const stored = localStorage.getItem('iot4all_token') || sessionStorage.getItem('iot4all_token');
-        if (stored) {
-            setToken(stored);
+        const storedToken = localStorage.getItem('iot4all_token') || sessionStorage.getItem('iot4all_token');
+        const storedUser = localStorage.getItem('iot4all_user');
+
+        if (storedToken) {
+            setToken(storedToken);
+            if (storedUser) {
+                try {
+                    setUser(JSON.parse(storedUser));
+                } catch (e) {
+                    console.error("Failed to parse stored user", e);
+                }
+            }
+
             api.getMe()
-                .then(({ user }) => setUser(user))
-                .catch(() => { 
+                .then(({ user }) => {
+                    setUser(user);
+                    localStorage.setItem('iot4all_user', JSON.stringify(user));
+                })
+                .catch(() => {
                     localStorage.removeItem('iot4all_token');
                     sessionStorage.removeItem('iot4all_token');
+                    localStorage.removeItem('iot4all_user');
+                    setUser(null);
+                    setToken(null);
                 })
                 .finally(() => setLoading(false));
         } else {
@@ -52,8 +68,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { token: t, user: u } = await api.login({ email, password });
         if (rememberMe) {
             localStorage.setItem('iot4all_token', t);
+            localStorage.setItem('iot4all_user', JSON.stringify(u));
         } else {
             sessionStorage.setItem('iot4all_token', t);
+            // We still store user in localStorage for instant hydration next time
+            // but the token is in sessionStorage so it expires on tab close
+            localStorage.setItem('iot4all_user', JSON.stringify(u));
         }
         setToken(t);
         setUser(u);
@@ -62,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const register = async (data: object) => {
         const { token: t, user: u } = await api.register(data);
         localStorage.setItem('iot4all_token', t);
+        localStorage.setItem('iot4all_user', JSON.stringify(u));
         setToken(t);
         setUser(u);
     };
@@ -69,6 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = () => {
         localStorage.removeItem('iot4all_token');
         sessionStorage.removeItem('iot4all_token');
+        localStorage.removeItem('iot4all_user');
         setToken(null);
         setUser(null);
     };

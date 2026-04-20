@@ -16,7 +16,7 @@ const CHANNELS = [
 interface Msg { _id?: string; user: { _id?: string; name: string; avatar?: string; role?: string }; content: string; createdAt: string; fileData?: string; fileName?: string; fileType?: string; }
 
 export default function MeetingPage() {
-    const { user, token, isMember } = useAuth();
+    const { user, token, isMember, loading: authLoading } = useAuth();
     const [channel, setChannel] = useState("general");
     const [messages, setMessages] = useState<Msg[]>([]);
     const [input, setInput] = useState("");
@@ -250,6 +250,15 @@ export default function MeetingPage() {
     };
 
     const handleKey = (e: React.KeyboardEvent) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
+
+    if (authLoading) return (
+        <main className="flex-1 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+                <Loader2 className="text-accent animate-spin" size={40} />
+                <p className="text-secondary font-medium animate-pulse">Verifying Session...</p>
+            </div>
+        </main>
+    );
 
     if (!user) return (
         <main className="flex-1 flex items-center justify-center text-center px-6">

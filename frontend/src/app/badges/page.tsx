@@ -9,7 +9,7 @@ interface Badge { _id: string; name: string; description: string; icon: string; 
 interface Member { _id: string; name: string; email: string; role: string; badges: Array<{ _id: string; name: string; icon: string; color: string }>; avatar?: string; }
 
 export default function BadgesPage() {
-    const { isAdmin } = useAuth();
+    const { isAdmin, loading: authLoading } = useAuth();
     const [badges, setBadges] = useState<Badge[]>([]);
     const [members, setMembers] = useState<Member[]>([]);
     const [loading, setLoading] = useState(true);
@@ -57,6 +57,12 @@ export default function BadgesPage() {
             setLoading(false);
         }
     };
+
+    if (authLoading) return (
+        <main className="flex-1 flex items-center justify-center">
+            <Loader2 className="text-accent animate-spin" size={40} />
+        </main>
+    );
 
     if (!isAdmin) return (
         <main className="flex-1 flex items-center justify-center text-center px-6">
